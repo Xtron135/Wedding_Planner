@@ -1,1 +1,13 @@
-{ "lelaki": [], "perempuan": [] }
+{
+  "lelaki": [
+    {
+      "id": "guests_msoff6oi_bmsn6w",
+      "name": "asdf",
+      "phone": "1234",
+      "pax": 1,
+      "rsvp": "not_answered",
+      "tableNo": ""
+    }
+  ],
+  "perempuan": []
+}
