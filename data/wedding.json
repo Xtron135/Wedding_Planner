@@ -1,9 +1,17 @@
 {
-  "groomName": "",
-  "brideName": "",
-  "createdAt": null,
+  "groomName": "Yum",
+  "brideName": "Liya",
+  "createdAt": "2026-08-11",
   "events": [
-    { "type": "combined", "date": "", "venue": "" },
-    { "type": "", "date": "", "venue": "" }
+    {
+      "type": "bride",
+      "date": "2027-06-06",
+      "venue": "Melaka"
+    },
+    {
+      "type": "groom",
+      "date": "2027-08-14",
+      "venue": "Kedah"
+    }
   ]
 }
