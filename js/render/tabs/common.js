@@ -3,7 +3,16 @@ import { genId } from '../../crypto.js';
 import { t } from '../../i18n.js';
 import { showToast } from '../../toast.js';
 
-const AUTOSAVE_DELAY_MS = 1000;
+// Fields with a visible "Tambah"/"Simpan" button nearby (text/number/date) get a
+// relaxed auto-save delay since the button is already there for an immediate save.
+// Discrete choice fields (dropdowns, checkboxes) auto-save fast — picking an option
+// is a complete action, not a mid-keystroke draft.
+const TEXT_AUTOSAVE_DELAY_MS = 60000;
+const CHOICE_AUTOSAVE_DELAY_MS = 1000;
+
+function isChoiceElement(el) {
+  return !!el && (el.tagName === 'SELECT' || (el.tagName === 'INPUT' && el.type === 'checkbox'));
+}
 
 export function createSideListTab({ tabId, getTitle, icon, fields }) {
   let currentSide = 'lelaki';
@@ -14,7 +23,11 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
 
   function emptyForm() {
     const obj = {};
-    fields.forEach(f => { obj[f.key] = f.type === 'checkbox' ? false : ''; });
+    fields.forEach(f => {
+      if (f.type === 'checkbox') obj[f.key] = false;
+      else if (f.type === 'select') obj[f.key] = f.defaultValue !== undefined ? f.defaultValue : ((f.options && f.options[0]) ? f.options[0].value : '');
+      else obj[f.key] = '';
+    });
     return obj;
   }
   let formState = emptyForm();
@@ -66,7 +79,8 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
     if (f.type === 'checkbox') {
       return `<div class="form-check mt-2"><input class="form-check-input" type="checkbox" data-field="${f.key}" ${val ? 'checked' : ''}></div>`;
     }
-    return `<input class="form-control form-control-sm" type="${f.type}" data-field="${f.key}" value="${val}" placeholder="${fieldLabel(f)}">`;
+    const extraAttrs = (f.type === 'number' && f.format === 'count') ? 'min="0" step="1"' : '';
+    return `<input class="form-control form-control-sm" type="${f.type}" data-field="${f.key}" value="${val}" placeholder="${fieldLabel(f)}" ${extraAttrs}>`;
   }
 
   function formHtml() {
@@ -89,6 +103,7 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
     if (f.type === 'checkbox') return val ? '✅' : '❌';
     if (f.type === 'select') return optionLabel(f, val);
     if (f.type === 'number' && val !== '' && val !== null && val !== undefined) {
+      if (f.format === 'count') return Number(val).toLocaleString('en-US');
       return `RM ${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
     }
     return val === undefined || val === null ? '' : val;
@@ -108,7 +123,10 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
     const numField = fields.find(f => f.type === 'number');
     if (!numField) return '';
     const total = items.reduce((s, it) => s + (Number(it[numField.key]) || 0), 0);
-    return `<div class="text-muted small mb-2">${t('common.totalLabel')} ${fieldLabel(numField)}: <strong>RM ${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong> &middot; ${items.length} ${t('common.itemsSuffix')}</div>`;
+    const totalDisplay = numField.format === 'count'
+      ? total.toLocaleString('en-US')
+      : `RM ${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    return `<div class="text-muted small mb-2">${t('common.totalLabel')} ${fieldLabel(numField)}: <strong>${totalDisplay}</strong> &middot; ${items.length} ${t('common.itemsSuffix')}</div>`;
   }
 
   function sideSwitchHtml() {
@@ -197,7 +215,7 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
     }
   }
 
-  function scheduleAutoSave(container) {
+  function scheduleAutoSave(container, delayMs) {
     clearAutoSaveTimer();
     const hint = container.querySelector('#autoSaveHint');
     autoSaveTimer = setTimeout(async () => {
@@ -210,7 +228,7 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
       const isNew = !editingId;
       if (hint) hint.textContent = t('common.savingText');
       await doSave(container, side, targetId, isNew, values, null);
-    }, AUTOSAVE_DELAY_MS);
+    }, delayMs);
   }
 
   function bindEvents(container) {
@@ -225,8 +243,12 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
 
     const form = container.querySelector('#itemForm');
     if (form) {
-      form.addEventListener('input', () => scheduleAutoSave(container));
-      form.addEventListener('change', () => scheduleAutoSave(container));
+      form.addEventListener('input', (e) => {
+        scheduleAutoSave(container, isChoiceElement(e.target) ? CHOICE_AUTOSAVE_DELAY_MS : TEXT_AUTOSAVE_DELAY_MS);
+      });
+      form.addEventListener('change', (e) => {
+        scheduleAutoSave(container, isChoiceElement(e.target) ? CHOICE_AUTOSAVE_DELAY_MS : TEXT_AUTOSAVE_DELAY_MS);
+      });
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();

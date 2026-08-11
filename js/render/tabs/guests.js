@@ -8,7 +8,7 @@ export default createSideListTab({
   fields: [
     { key: 'name', labelKey: 'field.name', type: 'text', required: true },
     { key: 'phone', labelKey: 'field.phone', type: 'text' },
-    { key: 'pax', labelKey: 'field.pax', type: 'number' },
+    { key: 'pax', labelKey: 'field.pax', type: 'number', format: 'count' },
     {
       key: 'rsvp', labelKey: 'field.rsvp', type: 'select',
       options: [

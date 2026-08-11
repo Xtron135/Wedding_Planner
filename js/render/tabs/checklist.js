@@ -9,6 +9,12 @@ export default createSideListTab({
     { key: 'task', labelKey: 'field.task', type: 'text', required: true },
     { key: 'dueDate', labelKey: 'field.dueDate', type: 'date' },
     { key: 'assignedTo', labelKey: 'field.assignedTo', type: 'text' },
-    { key: 'done', labelKey: 'field.done', type: 'checkbox' },
+    {
+      key: 'done', labelKey: 'field.done', type: 'select', defaultValue: 'belum',
+      options: [
+        { value: 'belum', labelKey: 'option.checklistStatus.belum' },
+        { value: 'siap', labelKey: 'option.checklistStatus.siap' },
+      ],
+    },
   ],
 });

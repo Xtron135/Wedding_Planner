@@ -43,7 +43,9 @@ async function computeChecklistProgress() {
   const data = await Store.loadTabData('checklist');
   const all = [...(data.lelaki || []), ...(data.perempuan || [])];
   const total = all.length;
-  const done = all.filter(i => i.done).length;
+  // "done" used to be a boolean checkbox; it's now a select ('belum'/'siap').
+  // Accept both so old data ticked before this change still counts correctly.
+  const done = all.filter(i => i.done === true || i.done === 'siap').length;
   const pct = total === 0 ? 0 : Math.round((done / total) * 100);
   return { total, done, pct };
 }

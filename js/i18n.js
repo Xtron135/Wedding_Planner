@@ -75,6 +75,10 @@ const dict = {
     "option.customStatus.notStarted": "Not Started",
     "option.customStatus.inProgress": "In Progress",
     "option.customStatus.done": "Done",
+    "option.checklistStatus.belum": "Not Done",
+    "option.checklistStatus.siap": "Done",
+    "option.paidStatus.belum": "Not Paid",
+    "option.paidStatus.sudah": "Paid",
 
     "admin.title": "Administration & Permissions",
     "admin.tabUsers": "Users",
@@ -225,6 +229,10 @@ const dict = {
     "option.customStatus.notStarted": "Belum Mula",
     "option.customStatus.inProgress": "Sedang Jalan",
     "option.customStatus.done": "Siap",
+    "option.checklistStatus.belum": "Belum Siap",
+    "option.checklistStatus.siap": "Siap",
+    "option.paidStatus.belum": "Belum Bayar",
+    "option.paidStatus.sudah": "Dah Bayar",
 
     "admin.title": "Pentadbiran & Kebenaran",
     "admin.tabUsers": "Pengguna",
@@ -375,6 +383,10 @@ const dict = {
     "option.customStatus.notStarted": "未开始",
     "option.customStatus.inProgress": "进行中",
     "option.customStatus.done": "已完成",
+    "option.checklistStatus.belum": "未完成",
+    "option.checklistStatus.siap": "已完成",
+    "option.paidStatus.belum": "未付款",
+    "option.paidStatus.sudah": "已付款",
 
     "admin.title": "管理与权限",
     "admin.tabUsers": "用户",

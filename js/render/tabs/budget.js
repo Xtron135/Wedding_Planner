@@ -10,6 +10,12 @@ export default createSideListTab({
     { key: 'category', labelKey: 'field.category', type: 'text' },
     { key: 'estimated', labelKey: 'field.estimated', type: 'number' },
     { key: 'actual', labelKey: 'field.actual', type: 'number' },
-    { key: 'paid', labelKey: 'field.paid', type: 'checkbox' },
+    {
+      key: 'paid', labelKey: 'field.paid', type: 'select', defaultValue: 'belum',
+      options: [
+        { value: 'belum', labelKey: 'option.paidStatus.belum' },
+        { value: 'sudah', labelKey: 'option.paidStatus.sudah' },
+      ],
+    },
   ],
 });
