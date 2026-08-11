@@ -1,0 +1,9 @@
+{
+  "groomName": "",
+  "brideName": "",
+  "createdAt": null,
+  "events": [
+    { "type": "combined", "date": "", "venue": "" },
+    { "type": "", "date": "", "venue": "" }
+  ]
+}

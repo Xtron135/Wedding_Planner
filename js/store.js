@@ -33,6 +33,20 @@ export const Store = {
   async loadTabData(tabId) {
     return loadFile(tabId, { lelaki: [], perempuan: [] });
   },
+  async loadWedding() {
+    return loadFile('wedding', {
+      groomName: '',
+      brideName: '',
+      createdAt: null,
+      events: [
+        { type: 'combined', date: '', venue: '' },
+        { type: '', date: '', venue: '' },
+      ],
+    });
+  },
+  async saveWedding(data, message) {
+    return saveFile('wedding', data, message || 'Update wedding info');
+  },
   async saveUsers(users, message) {
     return saveFile('users', users, message || 'Kemaskini pengguna');
   },

@@ -10,6 +10,10 @@ const THEME_KEY = 'wp_theme_id';
 const CUSTOM_KEY = 'wp_theme_custom_primary';
 const DARK_KEY = 'wp_dark_mode';
 
+const DARK_BG = '#1c1917';
+const DARK_TEXT = '#f3ece7';
+const DARK_BLUSH = '#332a26';
+
 export function getThemeId() {
   const id = localStorage.getItem(THEME_KEY);
   return PRESETS.some(p => p.id === id) ? id : 'blush';
@@ -59,16 +63,27 @@ function shade(hex, percent) {
 export function applyTheme() {
   const preset = PRESETS.find(p => p.id === getThemeId()) || PRESETS[0];
   const custom = getCustomPrimary();
-  const primary = custom || preset.primary;
-  const primaryHover = custom ? shade(custom, -0.18) : preset.primaryHover;
+  const dark = isDarkMode();
+
+  // In dark mode, lighten the accent colour a touch so it stays readable on a dark background.
+  const primary = custom || (dark ? shade(preset.primary, 0.2) : preset.primary);
+  const primaryHover = custom ? shade(custom, dark ? 0.2 : -0.18) : (dark ? preset.primary : preset.primaryHover);
 
   const root = document.documentElement;
   root.style.setProperty('--wp-primary', primary);
   root.style.setProperty('--wp-primary-hover', primaryHover);
-  root.style.setProperty('--wp-blush', preset.blush);
-  root.style.setProperty('--wp-gold', preset.primary);
-  root.style.setProperty('--wp-cream', preset.cream);
-  root.style.setProperty('--wp-text', preset.text);
 
-  document.body.classList.toggle('dark-mode', isDarkMode());
+  if (dark) {
+    root.style.setProperty('--wp-blush', DARK_BLUSH);
+    root.style.setProperty('--wp-gold', preset.primary);
+    root.style.setProperty('--wp-cream', DARK_BG);
+    root.style.setProperty('--wp-text', DARK_TEXT);
+  } else {
+    root.style.setProperty('--wp-blush', preset.blush);
+    root.style.setProperty('--wp-gold', preset.primary);
+    root.style.setProperty('--wp-cream', preset.cream);
+    root.style.setProperty('--wp-text', preset.text);
+  }
+
+  document.body.classList.toggle('dark-mode', dark);
 }

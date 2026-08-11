@@ -105,7 +105,7 @@ function paintUserForm(wrap, user, refreshEl) {
         </div>
         <div class="col-12">
           <label class="form-label small d-block">${t('admin.formAllowedTabs')}</label>
-          ${tabsData.tabs.map(td => `
+          ${tabsData.tabs.filter(td => td.id !== 'dashboard').map(td => `
             <div class="form-check form-check-inline">
               <input class="form-check-input" type="checkbox" name="allowedTabs" value="${td.id}" id="perm_${td.id}" ${user && (user.allowedTabs || []).includes(td.id) ? 'checked' : ''}>
               <label class="form-check-label" for="perm_${td.id}">${tabLabel(td)}</label>

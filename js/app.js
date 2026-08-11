@@ -11,6 +11,7 @@ import guestsTab from './render/tabs/guests.js';
 import vendorsTab from './render/tabs/vendors.js';
 import { createCustomTab } from './render/tabs/custom.js';
 import { renderAdmin } from './render/admin.js';
+import { renderDashboard } from './render/dashboard.js';
 
 applyTheme();
 
@@ -115,7 +116,8 @@ function getVisibleTabs(user) {
 
 function renderApp(user) {
   const tabs = getVisibleTabs(user);
-  activeTabId = activeTabId && (activeTabId === '__admin__' || tabs.some(td => td.id === activeTabId)) ? activeTabId : (tabs[0] ? tabs[0].id : null);
+  const defaultTabId = tabs.some(td => td.id === 'dashboard') ? 'dashboard' : (tabs[0] ? tabs[0].id : null);
+  activeTabId = activeTabId && (activeTabId === '__admin__' || tabs.some(td => td.id === activeTabId)) ? activeTabId : defaultTabId;
 
   appRoot.innerHTML = `
     <nav class="navbar navbar-light bg-white border-bottom sticky-top px-3 d-flex d-md-none">
@@ -189,6 +191,7 @@ async function loadTabContent(user) {
     return;
   }
 
+  if (tabDef.id === 'dashboard') return renderDashboard(container);
   if (tabDef.id === 'checklist') return checklistTab.render(container);
   if (tabDef.id === 'budget') return budgetTab.render(container);
   if (tabDef.id === 'guests') return guestsTab.render(container);

@@ -1,5 +1,6 @@
 {
   "tabs": [
+    { "id": "dashboard", "label": "Dashboard", "icon": "🏠", "builtin": true, "type": "dashboard" },
     { "id": "checklist", "label": "Checklist Tugasan", "icon": "✅", "builtin": true, "type": "checklist" },
     { "id": "budget", "label": "Bajet & Perbelanjaan", "icon": "💰", "builtin": true, "type": "budget" },
     { "id": "guests", "label": "Senarai Tetamu", "icon": "👥", "builtin": true, "type": "guests" },

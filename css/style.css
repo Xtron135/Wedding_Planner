@@ -232,3 +232,54 @@ body.dark-mode .alert-danger {
 body.dark-mode .badge.bg-secondary {
   background-color: #5a5049 !important;
 }
+
+/* --- Progress bars (dashboard) --- */
+.progress {
+  background-color: rgba(0,0,0,0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.progress-bar {
+  background-color: var(--wp-primary);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+body.dark-mode .progress {
+  background-color: rgba(255,255,255,0.08);
+}
+
+/* --- Additional dark mode contrast fixes --- */
+body.dark-mode,
+body.dark-mode .content-area,
+body.dark-mode .app-layout {
+  background-color: var(--wp-cream);
+}
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6,
+body.dark-mode label,
+body.dark-mode .form-label,
+body.dark-mode td,
+body.dark-mode th {
+  color: var(--wp-text);
+}
+body.dark-mode .modal-header,
+body.dark-mode .modal-footer {
+  border-color: #3a332f !important;
+}
+body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator,
+body.dark-mode input[type="color"]::-webkit-color-swatch-wrapper {
+  filter: invert(0.85);
+}
+body.dark-mode .brand-title {
+  color: var(--wp-primary);
+}
+body.dark-mode a,
+body.dark-mode .btn-link {
+  color: var(--wp-primary);
+}

@@ -18,6 +18,7 @@ const dict = {
     "sidebar.passwordUpdated": "Password updated.",
 
     "nav.admin": "Administration",
+    "nav.dashboard": "Dashboard",
     "nav.checklist": "Task Checklist",
     "nav.budget": "Budget & Expenses",
     "nav.guests": "Guest List",
@@ -114,7 +115,28 @@ const dict = {
     "settings.language": "Language",
     "settings.theme": "Theme",
     "settings.darkMode": "Dark Mode",
-    "settings.close": "Close"
+    "settings.close": "Close",
+    "settings.tabDisplay": "Display",
+    "settings.tabWedding": "Wedding Info",
+
+    "wedding.groomNameLabel": "Groom's Name",
+    "wedding.brideNameLabel": "Bride's Name",
+    "wedding.combined": "Combined",
+    "wedding.eventPrefix": "Event",
+    "wedding.typeLabel": "Whose Event",
+    "wedding.dateLabel": "Date",
+    "wedding.venueLabel": "Venue",
+    "wedding.venuePlaceholder": "e.g. Dewan Sri Melati, Shah Alam",
+    "wedding.saveBtn": "Save",
+    "wedding.savingText": "Saving...",
+    "wedding.saved": "Saved!",
+
+    "dashboard.daysLeft": "{n} days to go",
+    "dashboard.today": "Today! 🎉",
+    "dashboard.past": "Event completed 🎊",
+    "dashboard.noEvents": "No event date set yet. Go to Settings to add one.",
+    "dashboard.checklistProgress": "Checklist Progress",
+    "dashboard.locale": "en-US"
   },
   ms: {
     "setup.desc": "Setup pertama kali: masukkan GitHub Personal Access Token untuk sambung ke repo data.",
@@ -135,6 +157,7 @@ const dict = {
     "sidebar.passwordUpdated": "Password dah dikemaskini.",
 
     "nav.admin": "Pentadbiran",
+    "nav.dashboard": "Dashboard",
     "nav.checklist": "Checklist Tugasan",
     "nav.budget": "Bajet & Perbelanjaan",
     "nav.guests": "Senarai Tetamu",
@@ -231,7 +254,28 @@ const dict = {
     "settings.language": "Bahasa",
     "settings.theme": "Tema",
     "settings.darkMode": "Mod Gelap",
-    "settings.close": "Tutup"
+    "settings.close": "Tutup",
+    "settings.tabDisplay": "Paparan",
+    "settings.tabWedding": "Maklumat Majlis",
+
+    "wedding.groomNameLabel": "Nama Pengantin Lelaki",
+    "wedding.brideNameLabel": "Nama Pengantin Perempuan",
+    "wedding.combined": "Gabungan",
+    "wedding.eventPrefix": "Majlis",
+    "wedding.typeLabel": "Majlis Pihak",
+    "wedding.dateLabel": "Tarikh",
+    "wedding.venueLabel": "Lokasi",
+    "wedding.venuePlaceholder": "Cth: Dewan Sri Melati, Shah Alam",
+    "wedding.saveBtn": "Simpan",
+    "wedding.savingText": "Menyimpan...",
+    "wedding.saved": "Dah disimpan!",
+
+    "dashboard.daysLeft": "{n} hari lagi",
+    "dashboard.today": "Hari ini! 🎉",
+    "dashboard.past": "Majlis dah selesai 🎊",
+    "dashboard.noEvents": "Tiada tarikh majlis ditetapkan lagi. Pergi ke Tetapan untuk tambah.",
+    "dashboard.checklistProgress": "Progress Checklist",
+    "dashboard.locale": "ms-MY"
   },
   zh: {
     "setup.desc": "首次设置：请输入您的 GitHub 个人访问令牌以连接数据仓库。",
@@ -252,6 +296,7 @@ const dict = {
     "sidebar.passwordUpdated": "密码已更新。",
 
     "nav.admin": "管理",
+    "nav.dashboard": "仪表盘",
     "nav.checklist": "任务清单",
     "nav.budget": "预算与支出",
     "nav.guests": "宾客名单",
@@ -348,7 +393,28 @@ const dict = {
     "settings.language": "语言",
     "settings.theme": "主题",
     "settings.darkMode": "深色模式",
-    "settings.close": "关闭"
+    "settings.close": "关闭",
+    "settings.tabDisplay": "显示",
+    "settings.tabWedding": "婚礼信息",
+
+    "wedding.groomNameLabel": "新郎姓名",
+    "wedding.brideNameLabel": "新娘姓名",
+    "wedding.combined": "联合",
+    "wedding.eventPrefix": "婚宴",
+    "wedding.typeLabel": "所属方",
+    "wedding.dateLabel": "日期",
+    "wedding.venueLabel": "地点",
+    "wedding.venuePlaceholder": "例如：Dewan Sri Melati, Shah Alam",
+    "wedding.saveBtn": "保存",
+    "wedding.savingText": "保存中...",
+    "wedding.saved": "已保存！",
+
+    "dashboard.daysLeft": "还剩 {n} 天",
+    "dashboard.today": "就是今天！🎉",
+    "dashboard.past": "婚礼已完成 🎊",
+    "dashboard.noEvents": "尚未设置婚礼日期。请前往设置添加。",
+    "dashboard.checklistProgress": "清单进度",
+    "dashboard.locale": "zh-CN"
   }
 };
 
