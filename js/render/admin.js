@@ -2,6 +2,7 @@ import { createUser, updateUser, deleteUser, getCurrentUser } from '../auth.js';
 import { Store, getCached } from '../store.js';
 import { genId } from '../crypto.js';
 import { t, tabLabel } from '../i18n.js';
+import { SIDE_TAB_TYPES } from '../permissions.js';
 
 export async function renderAdmin(container) {
   paint(container);
@@ -48,7 +49,14 @@ function paintUsers(el) {
               <td><span class="badge ${u.role === 'admin' ? 'bg-warning text-dark' : 'bg-secondary'}">${u.role === 'admin' ? t('admin.roleAdmin') : t('admin.roleUser')}</span></td>
               <td>${u.role === 'admin' ? t('admin.allTabsLabel') : ((u.allowedTabs || []).map(id => {
                 const td = tabsData.tabs.find(x => x.id === id);
-                return td ? tabLabel(td) : id;
+                if (!td) return id;
+                let label = tabLabel(td);
+                if (SIDE_TAB_TYPES.includes(td.type)) {
+                  const sa = (u.sideAccess && u.sideAccess[id]) || ['lelaki', 'perempuan'];
+                  if (sa.length === 0) label += ' (✖)';
+                  else if (sa.length === 1) label += sa[0] === 'lelaki' ? ' (🤵)' : ' (👰)';
+                }
+                return label;
               }).join(', ') || `<span class="text-muted">${t('admin.noneLabel')}</span>`)}</td>
               <td class="text-nowrap">
                 <button class="btn btn-sm btn-outline-secondary editUserBtn" data-id="${u.id}"><i class="bi bi-pencil"></i></button>
@@ -105,12 +113,32 @@ function paintUserForm(wrap, user, refreshEl) {
         </div>
         <div class="col-12">
           <label class="form-label small d-block">${t('admin.formAllowedTabs')}</label>
-          ${tabsData.tabs.filter(td => td.id !== 'dashboard').map(td => `
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="checkbox" name="allowedTabs" value="${td.id}" id="perm_${td.id}" ${user && (user.allowedTabs || []).includes(td.id) ? 'checked' : ''}>
-              <label class="form-check-label" for="perm_${td.id}">${tabLabel(td)}</label>
-            </div>
-          `).join('')}
+          <div class="d-flex flex-column gap-2">
+            ${tabsData.tabs.filter(td => td.id !== 'dashboard').map(td => {
+              const isSideTab = SIDE_TAB_TYPES.includes(td.type);
+              const sideAccess = (user && user.sideAccess && user.sideAccess[td.id]) || ['lelaki', 'perempuan'];
+              return `
+                <div class="border rounded p-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="allowedTabs" value="${td.id}" id="perm_${td.id}" ${user && (user.allowedTabs || []).includes(td.id) ? 'checked' : ''}>
+                    <label class="form-check-label fw-semibold" for="perm_${td.id}">${tabLabel(td)}</label>
+                  </div>
+                  ${isSideTab ? `
+                    <div class="ms-4 mt-1 d-flex gap-3">
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="side_${td.id}" value="lelaki" id="side_${td.id}_l" ${sideAccess.includes('lelaki') ? 'checked' : ''}>
+                        <label class="form-check-label small" for="side_${td.id}_l">🤵 ${t('side.groom')}</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="side_${td.id}" value="perempuan" id="side_${td.id}_p" ${sideAccess.includes('perempuan') ? 'checked' : ''}>
+                        <label class="form-check-label small" for="side_${td.id}_p">👰 ${t('side.bride')}</label>
+                      </div>
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
         </div>
         <div class="col-12 d-flex gap-2 mt-2">
           <button type="submit" class="btn btn-primary btn-sm">${t('admin.saveBtn')}</button>
@@ -124,6 +152,10 @@ function paintUserForm(wrap, user, refreshEl) {
     e.preventDefault();
     const fd = new FormData(e.target);
     const allowedTabs = fd.getAll('allowedTabs');
+    const sideAccess = {};
+    tabsData.tabs.filter(td => SIDE_TAB_TYPES.includes(td.type)).forEach(td => {
+      sideAccess[td.id] = fd.getAll(`side_${td.id}`);
+    });
     const submitBtn = e.target.querySelector('button[type=submit]');
     submitBtn.disabled = true;
     submitBtn.textContent = t('admin.savingText');
@@ -134,6 +166,7 @@ function paintUserForm(wrap, user, refreshEl) {
           password: fd.get('password') || undefined,
           role: fd.get('role'),
           allowedTabs,
+          sideAccess,
         });
       } else {
         await createUser({
@@ -142,6 +175,7 @@ function paintUserForm(wrap, user, refreshEl) {
           displayName: fd.get('displayName'),
           role: fd.get('role'),
           allowedTabs,
+          sideAccess,
         });
       }
       wrap.innerHTML = '';

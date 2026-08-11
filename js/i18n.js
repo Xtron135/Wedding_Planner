@@ -41,6 +41,7 @@ const dict = {
     "common.confirmDeleteItem": "Delete this item?",
     "common.saveFailedPrefix": "Failed to save: ",
     "common.deleteFailedPrefix": "Failed to delete: ",
+    "common.noSideAccess": "You don't have access to view this section.",
 
     "field.task": "Task",
     "field.dueDate": "Due Date",
@@ -180,6 +181,7 @@ const dict = {
     "common.confirmDeleteItem": "Padam item ni?",
     "common.saveFailedPrefix": "Gagal simpan: ",
     "common.deleteFailedPrefix": "Gagal padam: ",
+    "common.noSideAccess": "Anda tiada akses untuk lihat bahagian ni.",
 
     "field.task": "Tugasan",
     "field.dueDate": "Tarikh Akhir",
@@ -319,6 +321,7 @@ const dict = {
     "common.confirmDeleteItem": "确定要删除此项目吗？",
     "common.saveFailedPrefix": "保存失败：",
     "common.deleteFailedPrefix": "删除失败：",
+    "common.noSideAccess": "您没有权限查看此部分。",
 
     "field.task": "任务",
     "field.dueDate": "截止日期",

@@ -6,6 +6,7 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
   let currentSide = 'lelaki';
   let data = { lelaki: [], perempuan: [] };
   let editingId = null;
+  let allowedSides = ['lelaki', 'perempuan'];
 
   function emptyForm() {
     const obj = {};
@@ -14,7 +15,15 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
   }
   let formState = emptyForm();
 
-  async function render(container) {
+  async function render(container, sides) {
+    allowedSides = Array.isArray(sides) ? sides : ['lelaki', 'perempuan'];
+
+    if (allowedSides.length === 0) {
+      container.innerHTML = `<div class="text-muted text-center py-5"><i class="bi bi-lock"></i> ${t('common.noSideAccess')}</div>`;
+      return;
+    }
+    if (!allowedSides.includes(currentSide)) currentSide = allowedSides[0];
+
     data = await Store.loadTabData(tabId);
     if (!data.lelaki) data.lelaki = [];
     if (!data.perempuan) data.perempuan = [];
@@ -89,15 +98,22 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
     return `<div class="text-muted small mb-2">${t('common.totalLabel')} ${fieldLabel(numField)}: <strong>RM ${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong> &middot; ${items.length} ${t('common.itemsSuffix')}</div>`;
   }
 
+  function sideSwitchHtml() {
+    if (allowedSides.length < 2) return '';
+    return `
+      <div class="btn-group side-switch" role="group">
+        ${allowedSides.includes('lelaki') ? `<button type="button" class="btn ${currentSide === 'lelaki' ? 'btn-primary' : 'btn-outline-primary'}" data-side="lelaki">\u{1F935} ${t('side.groom')}</button>` : ''}
+        ${allowedSides.includes('perempuan') ? `<button type="button" class="btn ${currentSide === 'perempuan' ? 'btn-primary' : 'btn-outline-primary'}" data-side="perempuan">\u{1F470} ${t('side.bride')}</button>` : ''}
+      </div>
+    `;
+  }
+
   function paint(container) {
     const items = data[currentSide] || [];
     container.innerHTML = `
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <h2 class="mb-0">${icon || ''} ${getTitle()}</h2>
-        <div class="btn-group side-switch" role="group">
-          <button type="button" class="btn ${currentSide === 'lelaki' ? 'btn-primary' : 'btn-outline-primary'}" data-side="lelaki">\u{1F935} ${t('side.groom')}</button>
-          <button type="button" class="btn ${currentSide === 'perempuan' ? 'btn-primary' : 'btn-outline-primary'}" data-side="perempuan">\u{1F470} ${t('side.bride')}</button>
-        </div>
+        ${sideSwitchHtml()}
       </div>
       ${formHtml()}
       ${summaryHtml(items)}

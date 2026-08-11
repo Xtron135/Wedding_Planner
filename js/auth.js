@@ -32,7 +32,7 @@ export async function login(username, password) {
   return user;
 }
 
-export async function createUser({ username, password, displayName, role, allowedTabs }) {
+export async function createUser({ username, password, displayName, role, allowedTabs, sideAccess }) {
   const usersData = getCached('users');
   if (usersData.users.some(u => u.username.toLowerCase() === username.trim().toLowerCase())) {
     throw new Error('Username dah wujud.');
@@ -47,6 +47,7 @@ export async function createUser({ username, password, displayName, role, allowe
     salt,
     role: role || 'user',
     allowedTabs: role === 'admin' ? ['*'] : (allowedTabs || []),
+    sideAccess: role === 'admin' ? {} : (sideAccess || {}),
   };
   usersData.users.push(newUser);
   await Store.saveUsers(usersData, `Tambah pengguna: ${newUser.username}`);
@@ -69,6 +70,7 @@ export async function updateUser(userId, patch) {
     if (patch.role === 'admin') user.allowedTabs = ['*'];
   }
   if (patch.allowedTabs !== undefined && user.role !== 'admin') user.allowedTabs = patch.allowedTabs;
+  if (patch.sideAccess !== undefined && user.role !== 'admin') user.sideAccess = patch.sideAccess;
   usersData.users[idx] = user;
   await Store.saveUsers(usersData, `Kemaskini pengguna: ${user.username}`);
   const current = getCurrentUser();

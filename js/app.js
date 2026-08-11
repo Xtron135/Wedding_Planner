@@ -1,7 +1,7 @@
 import { getToken, setToken, clearToken, verifyAccess } from './github-api.js';
 import { Store, getCached } from './store.js';
 import { getCurrentUser, login, logout, updateUser } from './auth.js';
-import { canView, isAdmin } from './permissions.js';
+import { canView, isAdmin, getAllowedSides } from './permissions.js';
 import { t, tabLabel, LANGUAGES, getLang, setLang } from './i18n.js';
 import { applyTheme } from './theme.js';
 import { openSettingsModal } from './render/settings.js';
@@ -192,13 +192,13 @@ async function loadTabContent(user) {
   }
 
   if (tabDef.id === 'dashboard') return renderDashboard(container);
-  if (tabDef.id === 'checklist') return checklistTab.render(container);
-  if (tabDef.id === 'budget') return budgetTab.render(container);
-  if (tabDef.id === 'guests') return guestsTab.render(container);
-  if (tabDef.id === 'vendors') return vendorsTab.render(container);
+  if (tabDef.id === 'checklist') return checklistTab.render(container, getAllowedSides(user, 'checklist'));
+  if (tabDef.id === 'budget') return budgetTab.render(container, getAllowedSides(user, 'budget'));
+  if (tabDef.id === 'guests') return guestsTab.render(container, getAllowedSides(user, 'guests'));
+  if (tabDef.id === 'vendors') return vendorsTab.render(container, getAllowedSides(user, 'vendors'));
 
   if (!customTabInstances[tabDef.id]) customTabInstances[tabDef.id] = createCustomTab(tabDef);
-  return customTabInstances[tabDef.id].render(container);
+  return customTabInstances[tabDef.id].render(container, getAllowedSides(user, tabDef.id));
 }
 
 boot();
