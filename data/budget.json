@@ -1,1 +1,13 @@
-{ "lelaki": [], "perempuan": [] }
+{
+  "lelaki": [
+    {
+      "id": "budget_msohcb2y_zhgrkb",
+      "item": "aasdf",
+      "category": "asdf",
+      "estimated": 123,
+      "actual": 123,
+      "paid": false
+    }
+  ],
+  "perempuan": []
+}
