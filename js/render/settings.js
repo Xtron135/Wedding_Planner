@@ -1,6 +1,7 @@
 import { LANGUAGES, getLang, setLang, t } from '../i18n.js';
 import { PRESETS, getThemeId, setThemeId, getCustomPrimary, setCustomPrimary, isDarkMode, setDarkMode } from '../theme.js';
 import { Store } from '../store.js';
+import { showToast } from '../toast.js';
 
 let modalEl = null;
 let activeSection = 'display';
@@ -162,22 +163,24 @@ async function paintWeddingSection(onChange) {
       venue: fd.get(`venue_${i}`) || '',
     }));
     const hasAnyDate = newEvents.some(ev => ev.date);
-    const updated = {
-      groomName: fd.get('groomName') || '',
-      brideName: fd.get('brideName') || '',
-      createdAt: wedding.createdAt || (hasAnyDate ? new Date().toISOString().slice(0, 10) : null),
-      events: newEvents,
-    };
+    const groomName = fd.get('groomName') || '';
+    const brideName = fd.get('brideName') || '';
     const submitBtn = e.target.querySelector('button[type=submit]');
     const statusEl = document.getElementById('weddingSaveStatus');
     submitBtn.disabled = true;
     submitBtn.textContent = t('wedding.savingText');
     statusEl.textContent = '';
     try {
-      await Store.saveWedding(updated, 'Update wedding info');
+      await Store.mutateWedding((working) => {
+        working.groomName = groomName;
+        working.brideName = brideName;
+        working.events = newEvents;
+        if (!working.createdAt && hasAnyDate) working.createdAt = new Date().toISOString().slice(0, 10);
+      }, 'Update wedding info');
       submitBtn.disabled = false;
       submitBtn.textContent = t('wedding.saveBtn');
       statusEl.textContent = t('wedding.saved');
+      showToast(t('common.saved'));
       if (onChange) onChange();
     } catch (err) {
       alert(t('common.saveFailedPrefix') + err.message);

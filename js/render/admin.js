@@ -3,6 +3,7 @@ import { Store, getCached } from '../store.js';
 import { genId } from '../crypto.js';
 import { t, tabLabel } from '../i18n.js';
 import { SIDE_TAB_TYPES } from '../permissions.js';
+import { showToast } from '../toast.js';
 
 export async function renderAdmin(container) {
   paint(container);
@@ -14,6 +15,7 @@ function paint(container) {
     <ul class="nav nav-tabs mb-3">
       <li class="nav-item"><button class="nav-link active" data-sub="users">${t('admin.tabUsers')}</button></li>
       <li class="nav-item"><button class="nav-link" data-sub="tabs">${t('admin.tabTabs')}</button></li>
+      <li class="nav-item"><button class="nav-link text-danger" data-sub="danger">⚠️ ${t('admin.dangerZoneNav')}</button></li>
     </ul>
     <div id="adminSubContent"></div>
   `;
@@ -21,8 +23,10 @@ function paint(container) {
     btn.addEventListener('click', () => {
       container.querySelectorAll('[data-sub]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      if (btn.dataset.sub === 'users') paintUsers(container.querySelector('#adminSubContent'));
-      else paintTabsManager(container.querySelector('#adminSubContent'));
+      const sub = container.querySelector('#adminSubContent');
+      if (btn.dataset.sub === 'users') paintUsers(sub);
+      else if (btn.dataset.sub === 'tabs') paintTabsManager(sub);
+      else paintDangerZone(sub);
     });
   });
   paintUsers(container.querySelector('#adminSubContent'));
@@ -79,6 +83,7 @@ function paintUsers(el) {
     try {
       await deleteUser(b.dataset.id);
       paintUsers(el);
+      showToast(t('common.saved'));
     } catch (err) {
       alert(err.message);
     }
@@ -180,6 +185,7 @@ function paintUserForm(wrap, user, refreshEl) {
       }
       wrap.innerHTML = '';
       paintUsers(refreshEl);
+      showToast(t('common.saved'));
     } catch (err) {
       alert(err.message);
       submitBtn.disabled = false;
@@ -234,12 +240,14 @@ function paintTabsManager(el) {
       submitBtn.disabled = true;
       submitBtn.textContent = t('admin.creatingText');
       try {
-        tabsData.tabs.push(newTab);
-        await Store.saveTabs(tabsData, `Add new tab: ${newTab.label}`);
+        await Store.mutateTabs((working) => {
+          if (!working.tabs) working.tabs = [];
+          working.tabs.push(newTab);
+        }, `Add new tab: ${newTab.label}`);
         wrap.innerHTML = '';
         paintTabsManager(el);
+        showToast(t('common.saved'));
       } catch (err) {
-        tabsData.tabs = tabsData.tabs.filter(x => x.id !== id);
         alert(err.message);
         submitBtn.disabled = false;
         submitBtn.textContent = t('admin.createTabBtn');
@@ -248,14 +256,101 @@ function paintTabsManager(el) {
   });
   el.querySelectorAll('.delTabBtn').forEach(b => b.addEventListener('click', async () => {
     if (!confirm(t('admin.confirmDeleteTab'))) return;
-    const backup = tabsData.tabs;
-    tabsData.tabs = tabsData.tabs.filter(td => td.id !== b.dataset.id);
     try {
-      await Store.saveTabs(tabsData, 'Delete tab');
+      await Store.mutateTabs((working) => {
+        working.tabs = (working.tabs || []).filter(td => td.id !== b.dataset.id);
+      }, 'Delete tab');
       paintTabsManager(el);
+      showToast(t('common.saved'));
     } catch (err) {
-      tabsData.tabs = backup;
       alert(err.message);
     }
   }));
+}
+
+function paintDangerZone(el) {
+  el.innerHTML = `
+    <div class="border border-danger rounded p-3">
+      <h5 class="text-danger mb-2"><i class="bi bi-exclamation-triangle-fill"></i> ${t('admin.dangerZoneTitle')}</h5>
+      <p class="text-muted small mb-3">${t('admin.dangerZoneDesc')}</p>
+      <button class="btn btn-danger btn-sm" id="openResetBtn"><i class="bi bi-trash3"></i> ${t('admin.resetAllBtn')}</button>
+    </div>
+  `;
+  el.querySelector('#openResetBtn').addEventListener('click', () => openResetModal());
+}
+
+function openResetModal() {
+  let modalEl = document.getElementById('resetDangerModal');
+  if (!modalEl) {
+    modalEl = document.createElement('div');
+    modalEl.id = 'resetDangerModal';
+    modalEl.className = 'modal fade';
+    modalEl.tabIndex = -1;
+    document.body.appendChild(modalEl);
+  }
+  modalEl.innerHTML = `
+    <div class="modal-dialog">
+      <div class="modal-content border-danger">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">⚠️ ${t('admin.dangerZoneTitle')}</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>${t('admin.resetWarning')}</p>
+          <p class="small text-muted mb-1">${t('admin.resetTypeHint')}</p>
+          <input class="form-control" id="resetConfirmInput" placeholder="RESET" autocomplete="off">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">${t('common.cancelBtn')}</button>
+          <button type="button" class="btn btn-danger btn-sm" id="confirmResetBtn" disabled>${t('admin.resetAllBtn')}</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const input = modalEl.querySelector('#resetConfirmInput');
+  const confirmBtn = modalEl.querySelector('#confirmResetBtn');
+  input.addEventListener('input', () => {
+    confirmBtn.disabled = input.value.trim().toUpperCase() !== 'RESET';
+  });
+
+  confirmBtn.addEventListener('click', async () => {
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = t('admin.resettingText');
+    try {
+      await performFullReset();
+      const modalInstance = window.bootstrap.Modal.getInstance(modalEl);
+      if (modalInstance) modalInstance.hide();
+      showToast(t('admin.resetDone'), 'danger');
+    } catch (err) {
+      alert(t('common.saveFailedPrefix') + err.message);
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = t('admin.resetAllBtn');
+    }
+  });
+
+  const modal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+  modal.show();
+}
+
+async function performFullReset() {
+  const tabsData = getCached('tabs') || { tabs: [] };
+  const sideTabIds = tabsData.tabs.filter(td => td.type !== 'dashboard').map(td => td.id);
+
+  for (const tabId of sideTabIds) {
+    await Store.mutateTabData(tabId, (working) => {
+      working.lelaki = [];
+      working.perempuan = [];
+    }, `Danger Zone: reset ${tabId}`);
+  }
+
+  await Store.mutateWedding((working) => {
+    working.groomName = '';
+    working.brideName = '';
+    working.createdAt = null;
+    working.events = [
+      { type: 'combined', date: '', venue: '' },
+      { type: '', date: '', venue: '' },
+    ];
+  }, 'Danger Zone: reset wedding info');
 }

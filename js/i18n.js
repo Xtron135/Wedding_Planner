@@ -42,6 +42,7 @@ const dict = {
     "common.saveFailedPrefix": "Failed to save: ",
     "common.deleteFailedPrefix": "Failed to delete: ",
     "common.noSideAccess": "You don't have access to view this section.",
+    "common.saved": "Saved",
 
     "field.task": "Task",
     "field.dueDate": "Due Date",
@@ -111,6 +112,15 @@ const dict = {
     "admin.builtinBadge": "Built-in",
     "admin.customBadge": "Custom",
     "admin.confirmDeleteTab": "Delete this tab? Existing data won't be deleted from the repo but the tab will no longer be shown.",
+
+    "admin.dangerZoneNav": "Danger Zone",
+    "admin.dangerZoneTitle": "Danger Zone",
+    "admin.dangerZoneDesc": "Permanently wipe all wedding planning data (checklist, budget, guest list, vendors, and wedding info). User accounts and tab setup are not affected.",
+    "admin.resetAllBtn": "Reset & Wipe All Data",
+    "admin.resetWarning": "This will permanently delete ALL checklist items, budget entries, guests, vendors, and wedding info (names/dates/venues) for both sides. This cannot be undone from within the app.",
+    "admin.resetTypeHint": "Type RESET below to confirm.",
+    "admin.resettingText": "Wiping data...",
+    "admin.resetDone": "All data has been reset.",
 
     "settings.title": "Settings",
     "settings.language": "Language",
@@ -182,6 +192,7 @@ const dict = {
     "common.saveFailedPrefix": "Gagal simpan: ",
     "common.deleteFailedPrefix": "Gagal padam: ",
     "common.noSideAccess": "Anda tiada akses untuk lihat bahagian ni.",
+    "common.saved": "Disimpan",
 
     "field.task": "Tugasan",
     "field.dueDate": "Tarikh Akhir",
@@ -251,6 +262,15 @@ const dict = {
     "admin.builtinBadge": "Asal",
     "admin.customBadge": "Custom",
     "admin.confirmDeleteTab": "Padam tab ni? Data sedia ada takkan dipadam dari repo tapi tab takkan dipaparkan lagi.",
+
+    "admin.dangerZoneNav": "Danger Zone",
+    "admin.dangerZoneTitle": "Danger Zone",
+    "admin.dangerZoneDesc": "Padam kekal SEMUA data perancangan majlis (checklist, bajet, senarai tetamu, vendor, dan maklumat majlis). Akaun pengguna dan struktur tab TIDAK terjejas.",
+    "admin.resetAllBtn": "Reset & Padam Semua Data",
+    "admin.resetWarning": "Ini akan padam KEKAL semua item checklist, entri bajet, tetamu, vendor, dan maklumat majlis (nama/tarikh/lokasi) untuk kedua-dua pihak. Tindakan ni tak boleh undo dalam app.",
+    "admin.resetTypeHint": "Taip RESET di bawah untuk sahkan.",
+    "admin.resettingText": "Memadam data...",
+    "admin.resetDone": "Semua data telah direset.",
 
     "settings.title": "Tetapan",
     "settings.language": "Bahasa",
@@ -322,6 +342,7 @@ const dict = {
     "common.saveFailedPrefix": "保存失败：",
     "common.deleteFailedPrefix": "删除失败：",
     "common.noSideAccess": "您没有权限查看此部分。",
+    "common.saved": "已保存",
 
     "field.task": "任务",
     "field.dueDate": "截止日期",
@@ -391,6 +412,15 @@ const dict = {
     "admin.builtinBadge": "内置",
     "admin.customBadge": "自定义",
     "admin.confirmDeleteTab": "确定要删除此标签吗？现有数据不会从仓库中删除，但标签将不再显示。",
+
+    "admin.dangerZoneNav": "危险区域",
+    "admin.dangerZoneTitle": "危险区域",
+    "admin.dangerZoneDesc": "永久清除所有婚礼筹备数据（清单、预算、宾客名单、供应商和婚礼信息）。用户账户和标签设置不受影响。",
+    "admin.resetAllBtn": "重置并清除所有数据",
+    "admin.resetWarning": "此操作将永久删除双方所有清单项目、预算条目、宾客、供应商和婚礼信息（姓名/日期/地点）。此操作在应用内无法撤销。",
+    "admin.resetTypeHint": "请在下方输入 RESET 以确认。",
+    "admin.resettingText": "正在清除数据...",
+    "admin.resetDone": "所有数据已重置。",
 
     "settings.title": "设置",
     "settings.language": "语言",

@@ -1,12 +1,16 @@
 import { Store } from '../../store.js';
 import { genId } from '../../crypto.js';
 import { t } from '../../i18n.js';
+import { showToast } from '../../toast.js';
+
+const AUTOSAVE_DELAY_MS = 1000;
 
 export function createSideListTab({ tabId, getTitle, icon, fields }) {
   let currentSide = 'lelaki';
   let data = { lelaki: [], perempuan: [] };
   let editingId = null;
   let allowedSides = ['lelaki', 'perempuan'];
+  let autoSaveTimer = null;
 
   function emptyForm() {
     const obj = {};
@@ -15,7 +19,15 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
   }
   let formState = emptyForm();
 
+  function clearAutoSaveTimer() {
+    if (autoSaveTimer) {
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = null;
+    }
+  }
+
   async function render(container, sides) {
+    clearAutoSaveTimer();
     allowedSides = Array.isArray(sides) ? sides : ['lelaki', 'perempuan'];
 
     if (allowedSides.length === 0) {
@@ -59,14 +71,15 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
 
   function formHtml() {
     return `
-      <form id="itemForm" class="row g-2 align-items-end p-3 mb-3 form-card">
+      <form id="itemForm" data-tab-id="${tabId}" class="row g-2 align-items-end p-3 mb-3 form-card">
         ${fields.map(f => `<div class="col-12 col-sm-6 col-md-3">
           <label class="form-label small mb-0">${fieldLabel(f)}</label>
           ${fieldInputHtml(f, formState[f.key])}
         </div>`).join('')}
-        <div class="col-12 col-md-auto d-flex gap-2">
+        <div class="col-12 col-md-auto d-flex gap-2 align-items-center">
           <button type="submit" class="btn btn-primary btn-sm">${editingId ? t('common.updateBtn') : t('common.addBtn')}</button>
           ${editingId ? `<button type="button" id="cancelEditBtn" class="btn btn-outline-secondary btn-sm">${t('common.cancelBtn')}</button>` : ''}
+          <span class="small text-muted" id="autoSaveHint"></span>
         </div>
       </form>
     `;
@@ -109,6 +122,7 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
   }
 
   function paint(container) {
+    clearAutoSaveTimer();
     const items = data[currentSide] || [];
     container.innerHTML = `
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
@@ -141,6 +155,64 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
     return obj;
   }
 
+  function hasRequiredFilled(values) {
+    return !fields.some(f => f.required && f.type !== 'checkbox' && !values[f.key] && values[f.key] !== 0);
+  }
+
+  // Shared save routine used by both the explicit Save/Update button and the
+  // 1-second idle auto-save. `container` is re-validated at call time via the
+  // form's data-tab-id, so a stale timer left over from a tab the user has since
+  // navigated away from will just no-op instead of corrupting another tab's data.
+  async function doSave(container, side, targetId, isNew, values, submitBtn) {
+    const form = container.querySelector('#itemForm');
+    if (!form || form.dataset.tabId !== tabId) return; // torn down / different tab now — abort silently
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = t('common.savingText');
+    }
+    try {
+      const saved = await Store.mutateTabData(tabId, (working) => {
+        if (!working[side]) working[side] = [];
+        const idx = working[side].findIndex(i => i.id === targetId);
+        if (isNew) {
+          if (idx === -1) working[side].push({ id: targetId, ...values });
+        } else if (idx !== -1) {
+          working[side][idx] = { ...working[side][idx], ...values };
+        } else {
+          working[side].push({ id: targetId, ...values });
+        }
+      }, `Update ${getTitle()} (${side})`);
+      data = saved;
+      editingId = null;
+      formState = emptyForm();
+      paint(container);
+      showToast(t('common.saved'));
+    } catch (err) {
+      alert(t('common.saveFailedPrefix') + err.message);
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = isNew ? t('common.addBtn') : t('common.updateBtn');
+      }
+    }
+  }
+
+  function scheduleAutoSave(container) {
+    clearAutoSaveTimer();
+    const hint = container.querySelector('#autoSaveHint');
+    autoSaveTimer = setTimeout(async () => {
+      const form = container.querySelector('#itemForm');
+      if (!form || form.dataset.tabId !== tabId) return;
+      const values = readForm(container);
+      if (!hasRequiredFilled(values)) return; // wait quietly until the required fields are filled in
+      const side = currentSide;
+      const targetId = editingId || genId(tabId);
+      const isNew = !editingId;
+      if (hint) hint.textContent = t('common.savingText');
+      await doSave(container, side, targetId, isNew, values, null);
+    }, AUTOSAVE_DELAY_MS);
+  }
+
   function bindEvents(container) {
     container.querySelectorAll('[data-side]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -153,37 +225,33 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
 
     const form = container.querySelector('#itemForm');
     if (form) {
+      form.addEventListener('input', () => scheduleAutoSave(container));
+      form.addEventListener('change', () => scheduleAutoSave(container));
+
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        clearAutoSaveTimer();
         const values = readForm(container);
-        const missingRequired = fields.some(f => f.required && f.type !== 'checkbox' && !values[f.key] && values[f.key] !== 0);
-        if (missingRequired) { alert(t('common.requiredFieldsAlert')); return; }
+        if (!hasRequiredFilled(values)) { alert(t('common.requiredFieldsAlert')); return; }
         const submitBtn = form.querySelector('button[type=submit]');
-        submitBtn.disabled = true;
-        submitBtn.textContent = t('common.savingText');
-        try {
-          if (editingId) {
-            const idx = data[currentSide].findIndex(i => i.id === editingId);
-            if (idx !== -1) data[currentSide][idx] = { ...data[currentSide][idx], ...values };
-          } else {
-            data[currentSide].push({ id: genId(tabId), ...values });
-          }
-          await Store.saveTabData(tabId, data, `Update ${getTitle()} (${currentSide})`);
-          editingId = null;
-          formState = emptyForm();
-          paint(container);
-        } catch (err) {
-          alert(t('common.saveFailedPrefix') + err.message);
-          submitBtn.disabled = false;
-          submitBtn.textContent = editingId ? t('common.updateBtn') : t('common.addBtn');
-        }
+        const side = currentSide;
+        const targetId = editingId || genId(tabId);
+        const isNew = !editingId;
+        await doSave(container, side, targetId, isNew, values, submitBtn);
       });
+
       const cancelBtn = container.querySelector('#cancelEditBtn');
-      if (cancelBtn) cancelBtn.addEventListener('click', () => { editingId = null; formState = emptyForm(); paint(container); });
+      if (cancelBtn) cancelBtn.addEventListener('click', () => {
+        clearAutoSaveTimer();
+        editingId = null;
+        formState = emptyForm();
+        paint(container);
+      });
     }
 
     container.querySelectorAll('.editBtn').forEach(btn => {
       btn.addEventListener('click', () => {
+        clearAutoSaveTimer();
         const item = data[currentSide].find(i => i.id === btn.dataset.id);
         if (!item) return;
         editingId = item.id;
@@ -195,13 +263,18 @@ export function createSideListTab({ tabId, getTitle, icon, fields }) {
     container.querySelectorAll('.delBtn').forEach(btn => {
       btn.addEventListener('click', async () => {
         if (!confirm(t('common.confirmDeleteItem'))) return;
-        const backup = data[currentSide];
-        data[currentSide] = data[currentSide].filter(i => i.id !== btn.dataset.id);
+        clearAutoSaveTimer();
+        const side = currentSide;
+        const itemId = btn.dataset.id;
         try {
-          await Store.saveTabData(tabId, data, `Delete item in ${getTitle()} (${currentSide})`);
+          const saved = await Store.mutateTabData(tabId, (working) => {
+            if (!working[side]) working[side] = [];
+            working[side] = working[side].filter(i => i.id !== itemId);
+          }, `Delete item in ${getTitle()} (${side})`);
+          data = saved;
           paint(container);
+          showToast(t('common.saved'));
         } catch (err) {
-          data[currentSide] = backup;
           alert(t('common.deleteFailedPrefix') + err.message);
         }
       });

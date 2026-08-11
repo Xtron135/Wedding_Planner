@@ -283,3 +283,11 @@ body.dark-mode a,
 body.dark-mode .btn-link {
   color: var(--wp-primary);
 }
+
+/* --- Toast (save confirmation) --- */
+.toast-container {
+  z-index: 1080;
+}
+.toast {
+  min-width: 200px;
+}

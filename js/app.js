@@ -5,6 +5,7 @@ import { canView, isAdmin, getAllowedSides } from './permissions.js';
 import { t, tabLabel, LANGUAGES, getLang, setLang } from './i18n.js';
 import { applyTheme } from './theme.js';
 import { openSettingsModal } from './render/settings.js';
+import { showToast } from './toast.js';
 import checklistTab from './render/tabs/checklist.js';
 import budgetTab from './render/tabs/budget.js';
 import guestsTab from './render/tabs/guests.js';
@@ -155,7 +156,7 @@ function renderApp(user) {
     if (!newPw) return;
     try {
       await updateUser(user.id, { password: newPw });
-      alert(t('sidebar.passwordUpdated'));
+      showToast(t('sidebar.passwordUpdated'));
     } catch (err) {
       alert(err.message);
     }
