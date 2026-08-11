@@ -1,1 +1,12 @@
-{ "lelaki": [], "perempuan": [] }
+{
+  "lelaki": [
+    {
+      "id": "checklist_msohd7uh_v8pv6h",
+      "task": "asdf",
+      "dueDate": "",
+      "assignedTo": "",
+      "done": false
+    }
+  ],
+  "perempuan": []
+}
