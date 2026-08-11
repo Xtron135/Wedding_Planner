@@ -10,6 +10,20 @@
       "allowedTabs": [
         "*"
       ]
+    },
+    {
+      "id": "u_msoeix57_tewl76",
+      "username": "user1",
+      "displayName": "user1",
+      "passwordHash": "16854267cb80a2b896b2a8114c79e238809d19e920a31e34ef8bad4cd2e18c02",
+      "salt": "0ec9934c60f0476b4b1cb6ce2daca369",
+      "role": "user",
+      "allowedTabs": [
+        "checklist",
+        "budget",
+        "guests",
+        "vendors"
+      ]
     }
   ]
 }
