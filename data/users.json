@@ -1,0 +1,13 @@
+{
+  "users": [
+    {
+      "id": "u_admin001",
+      "username": "admin",
+      "displayName": "Admin",
+      "passwordHash": "6bb2cf452a9a49fa3e4feca5a625a730be34d14e7cb26b678ae81af66823a6ed",
+      "salt": "9c550b7f34cbba4c78d4acd2b24ca484",
+      "role": "admin",
+      "allowedTabs": ["*"]
+    }
+  ]
+}
