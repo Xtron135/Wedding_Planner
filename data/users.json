@@ -4,10 +4,12 @@
       "id": "u_admin001",
       "username": "admin",
       "displayName": "Admin",
-      "passwordHash": "6bb2cf452a9a49fa3e4feca5a625a730be34d14e7cb26b678ae81af66823a6ed",
-      "salt": "9c550b7f34cbba4c78d4acd2b24ca484",
+      "passwordHash": "78269ac35103b8a64684b1e2645a9fab3496fff954a48b6fe700a5bbf4aa58c6",
+      "salt": "32e00871682a7a36704593862849d0ae",
       "role": "admin",
-      "allowedTabs": ["*"]
+      "allowedTabs": [
+        "*"
+      ]
     }
   ]
 }
