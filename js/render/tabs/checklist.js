@@ -1,13 +1,14 @@
 import { createSideListTab } from './common.js';
+import { t } from '../../i18n.js';
 
 export default createSideListTab({
   tabId: 'checklist',
-  title: 'Checklist Tugasan',
+  getTitle: () => t('nav.checklist'),
   icon: '✅',
   fields: [
-    { key: 'task', label: 'Tugasan', type: 'text', required: true },
-    { key: 'dueDate', label: 'Tarikh Akhir', type: 'date' },
-    { key: 'assignedTo', label: 'PIC', type: 'text' },
-    { key: 'done', label: 'Siap?', type: 'checkbox' },
+    { key: 'task', labelKey: 'field.task', type: 'text', required: true },
+    { key: 'dueDate', labelKey: 'field.dueDate', type: 'date' },
+    { key: 'assignedTo', labelKey: 'field.assignedTo', type: 'text' },
+    { key: 'done', labelKey: 'field.done', type: 'checkbox' },
   ],
 });

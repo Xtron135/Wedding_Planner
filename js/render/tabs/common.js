@@ -1,7 +1,8 @@
 import { Store } from '../../store.js';
 import { genId } from '../../crypto.js';
+import { t } from '../../i18n.js';
 
-export function createSideListTab({ tabId, title, icon, fields }) {
+export function createSideListTab({ tabId, getTitle, icon, fields }) {
   let currentSide = 'lelaki';
   let data = { lelaki: [], perempuan: [] };
   let editingId = null;
@@ -22,29 +23,41 @@ export function createSideListTab({ tabId, title, icon, fields }) {
     paint(container);
   }
 
+  function fieldLabel(f) {
+    return t(f.labelKey);
+  }
+
+  function optionLabel(f, val) {
+    if (f.options) {
+      const opt = f.options.find(o => o.value === val);
+      if (opt) return t(opt.labelKey);
+    }
+    return val === undefined || val === null ? '' : val;
+  }
+
   function fieldInputHtml(f, value) {
     const val = value === undefined || value === null ? (f.type === 'checkbox' ? false : '') : value;
     if (f.type === 'select') {
       return `<select class="form-select form-select-sm" data-field="${f.key}">
-        ${f.options.map(o => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('')}
+        ${f.options.map(o => `<option value="${o.value}" ${val === o.value ? 'selected' : ''}>${t(o.labelKey)}</option>`).join('')}
       </select>`;
     }
     if (f.type === 'checkbox') {
       return `<div class="form-check mt-2"><input class="form-check-input" type="checkbox" data-field="${f.key}" ${val ? 'checked' : ''}></div>`;
     }
-    return `<input class="form-control form-control-sm" type="${f.type}" data-field="${f.key}" value="${val}" placeholder="${f.label}">`;
+    return `<input class="form-control form-control-sm" type="${f.type}" data-field="${f.key}" value="${val}" placeholder="${fieldLabel(f)}">`;
   }
 
   function formHtml() {
     return `
       <form id="itemForm" class="row g-2 align-items-end p-3 mb-3 form-card">
         ${fields.map(f => `<div class="col-12 col-sm-6 col-md-3">
-          <label class="form-label small mb-0">${f.label}</label>
+          <label class="form-label small mb-0">${fieldLabel(f)}</label>
           ${fieldInputHtml(f, formState[f.key])}
         </div>`).join('')}
         <div class="col-12 col-md-auto d-flex gap-2">
-          <button type="submit" class="btn btn-primary btn-sm">${editingId ? 'Kemaskini' : 'Tambah'}</button>
-          ${editingId ? '<button type="button" id="cancelEditBtn" class="btn btn-outline-secondary btn-sm">Batal</button>' : ''}
+          <button type="submit" class="btn btn-primary btn-sm">${editingId ? t('common.updateBtn') : t('common.addBtn')}</button>
+          ${editingId ? `<button type="button" id="cancelEditBtn" class="btn btn-outline-secondary btn-sm">${t('common.cancelBtn')}</button>` : ''}
         </div>
       </form>
     `;
@@ -52,8 +65,9 @@ export function createSideListTab({ tabId, title, icon, fields }) {
 
   function displayValue(f, val) {
     if (f.type === 'checkbox') return val ? '✅' : '❌';
+    if (f.type === 'select') return optionLabel(f, val);
     if (f.type === 'number' && val !== '' && val !== null && val !== undefined) {
-      return `RM ${Number(val).toLocaleString('ms-MY', { minimumFractionDigits: 2 })}`;
+      return `RM ${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
     }
     return val === undefined || val === null ? '' : val;
   }
@@ -72,26 +86,26 @@ export function createSideListTab({ tabId, title, icon, fields }) {
     const numField = fields.find(f => f.type === 'number');
     if (!numField) return '';
     const total = items.reduce((s, it) => s + (Number(it[numField.key]) || 0), 0);
-    return `<div class="text-muted small mb-2">Jumlah ${numField.label}: <strong>RM ${total.toLocaleString('ms-MY', { minimumFractionDigits: 2 })}</strong> &middot; ${items.length} item</div>`;
+    return `<div class="text-muted small mb-2">${t('common.totalLabel')} ${fieldLabel(numField)}: <strong>RM ${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong> &middot; ${items.length} ${t('common.itemsSuffix')}</div>`;
   }
 
   function paint(container) {
     const items = data[currentSide] || [];
     container.innerHTML = `
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-        <h2 class="mb-0">${icon || ''} ${title}</h2>
+        <h2 class="mb-0">${icon || ''} ${getTitle()}</h2>
         <div class="btn-group side-switch" role="group">
-          <button type="button" class="btn ${currentSide === 'lelaki' ? 'btn-primary' : 'btn-outline-primary'}" data-side="lelaki">\u{1F935} Pengantin Lelaki</button>
-          <button type="button" class="btn ${currentSide === 'perempuan' ? 'btn-primary' : 'btn-outline-primary'}" data-side="perempuan">\u{1F470} Pengantin Perempuan</button>
+          <button type="button" class="btn ${currentSide === 'lelaki' ? 'btn-primary' : 'btn-outline-primary'}" data-side="lelaki">\u{1F935} ${t('side.groom')}</button>
+          <button type="button" class="btn ${currentSide === 'perempuan' ? 'btn-primary' : 'btn-outline-primary'}" data-side="perempuan">\u{1F470} ${t('side.bride')}</button>
         </div>
       </div>
       ${formHtml()}
       ${summaryHtml(items)}
       <div class="table-responsive">
         <table class="table table-hover align-middle bg-white">
-          <thead><tr>${fields.map(f => `<th>${f.label}</th>`).join('')}<th></th></tr></thead>
+          <thead><tr>${fields.map(f => `<th>${fieldLabel(f)}</th>`).join('')}<th></th></tr></thead>
           <tbody>
-            ${items.length === 0 ? `<tr><td colspan="${fields.length + 1}" class="text-muted text-center py-4">Takde data lagi.</td></tr>` : items.map(rowHtml).join('')}
+            ${items.length === 0 ? `<tr><td colspan="${fields.length + 1}" class="text-muted text-center py-4">${t('common.noDataYet')}</td></tr>` : items.map(rowHtml).join('')}
           </tbody>
         </table>
       </div>
@@ -127,10 +141,10 @@ export function createSideListTab({ tabId, title, icon, fields }) {
         e.preventDefault();
         const values = readForm(container);
         const missingRequired = fields.some(f => f.required && f.type !== 'checkbox' && !values[f.key] && values[f.key] !== 0);
-        if (missingRequired) { alert('Sila lengkapkan medan wajib.'); return; }
+        if (missingRequired) { alert(t('common.requiredFieldsAlert')); return; }
         const submitBtn = form.querySelector('button[type=submit]');
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Menyimpan...';
+        submitBtn.textContent = t('common.savingText');
         try {
           if (editingId) {
             const idx = data[currentSide].findIndex(i => i.id === editingId);
@@ -138,14 +152,14 @@ export function createSideListTab({ tabId, title, icon, fields }) {
           } else {
             data[currentSide].push({ id: genId(tabId), ...values });
           }
-          await Store.saveTabData(tabId, data, `Kemaskini ${title} (${currentSide})`);
+          await Store.saveTabData(tabId, data, `Update ${getTitle()} (${currentSide})`);
           editingId = null;
           formState = emptyForm();
           paint(container);
         } catch (err) {
-          alert('Gagal simpan: ' + err.message);
+          alert(t('common.saveFailedPrefix') + err.message);
           submitBtn.disabled = false;
-          submitBtn.textContent = editingId ? 'Kemaskini' : 'Tambah';
+          submitBtn.textContent = editingId ? t('common.updateBtn') : t('common.addBtn');
         }
       });
       const cancelBtn = container.querySelector('#cancelEditBtn');
@@ -164,15 +178,15 @@ export function createSideListTab({ tabId, title, icon, fields }) {
 
     container.querySelectorAll('.delBtn').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if (!confirm('Padam item ni?')) return;
+        if (!confirm(t('common.confirmDeleteItem'))) return;
         const backup = data[currentSide];
         data[currentSide] = data[currentSide].filter(i => i.id !== btn.dataset.id);
         try {
-          await Store.saveTabData(tabId, data, `Padam item dalam ${title} (${currentSide})`);
+          await Store.saveTabData(tabId, data, `Delete item in ${getTitle()} (${currentSide})`);
           paint(container);
         } catch (err) {
           data[currentSide] = backup;
-          alert('Gagal padam: ' + err.message);
+          alert(t('common.deleteFailedPrefix') + err.message);
         }
       });
     });
